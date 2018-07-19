@@ -123,38 +123,115 @@ def process_speech():
 	
 	if (confidence >= 0.0):
 		# Step 1: Call Dialogflow for intent analysis
-		intent_name, output_text = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
+		intent_name, output_text, product_name, emp_id, intent_stage = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
 		
 		# Step 2: Speech input processing by Twilio
-		values = {'prior_text': output_text}
-        	qs2 = urllib.urlencode(values)
-        	action_url = '/process_speech?' + qs2
-        	gather = Gather(input="speech", hints=hints, language=twilio_asr_language, speechTimeout="auto", action=action_url, method="POST")
-        	values = {"text": output_text, 
-			  "polly_voiceid": polly_voiceid, 
-			  "region": "ap-southeast-2"
-			 }
-		qs1 = urllib.urlencode(values)
-		print 'In-progress: Before polly tts'
-		gather.play(hostname + 'polly_text2speech?' + qs1)
-		print 'In progress: After polly tts'
-		resp.append(gather)
 		
-		# If gather is missing (no speech input), redirect to process incomplete speech via Dialogflow
-		values = {'prior_text': output_text, 
-			  "polly_voiceid": polly_voiceid, 
-			  'twilio_asr_language': twilio_asr_language, 
-			  'apiai_language': apiai_language, 
-			  'SpeechResult': '', 
-			  'Confidence': 0.0
-			 }
-		qs3 = urllib.urlencode(values)
-		action_url = '/process_speech?' + qs3
-		resp.redirect(action_url)
+		# Dialog is in progress
+		if dialog_state in ['in-progress']:
+			values = {'prior_text': output_text}
+        		qs2 = urllib.urlencode(values)
+        		action_url = '/process_speech?' + qs2
+        		gather = Gather(input="speech", hints=hints, language=twilio_asr_language, speechTimeout="auto", action=action_url, method="POST")
+        		values = {"text": output_text, 
+				  "polly_voiceid": polly_voiceid, 
+				  "region": "ap-southeast-2"
+				 }
+			qs1 = urllib.urlencode(values)
+			print 'In-progress: Before polly tts'
+			gather.play(hostname + 'polly_text2speech?' + qs1)
+			print 'In progress: After polly tts'
+			resp.append(gather)
+		
+			# If gather is missing (no speech input), redirect to process incomplete speech via Dialogflow
+			values = {'prior_text': output_text, 
+				  "polly_voiceid": polly_voiceid, 
+				  'twilio_asr_language': twilio_asr_language, 
+				  'apiai_language': apiai_language, 
+				  'SpeechResult': '', 
+				  'Confidence': 0.0}
+			qs3 = urllib.urlencode(values)
+			action_url = '/process_speech?' + qs3
+			resp.redirect(action_url)
+		
+		# Dialog is completed
+		elif dialog_state in ['complete']:
+			values = {"text": output_text, 
+				  "polly_voiceid": polly_voiceid, 
+				  "region": "ap-southeast-2"
+				 }
+			qs = urllib.urlencode(values)
+			resp.play(hostname + 'polly_text2speech?' + qs)
+			
+			# Perform employee number validation
+			if intent_name == 'get_employee_number_cartwright_yes':
+				#Validate employee number
+				if (str(emp_id)[:2]) != '10':
+					resp.dial('+919840610434')
+					
+			 # Transfer for Billing_services
+    			elif intentname == 'billing_services_cartwright':
+				if product_name == 'Postpaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Prepaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Mobile Broadband':
+					resp.dial('+919840610434')
+				elif product_name == 'Internet':
+					resp.dial('+919840610434')
+				elif product_name == 'Telephony':
+					resp.dial('+919840610434')
+				elif product_name == 'Optus TV':
+					resp.dial('+919840610434')
+				elif product_name == 'Financial Services':
+					resp.dial('+919840610434')
+					
+			# Transfer for Sales_services
+    			elif intentname == 'sales_services_cartwright':
+				if product_name == 'Postpaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Prepaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Mobile Broadband':
+					resp.dial('+919840610434')
+				elif product_name == 'Internet':
+					resp.dial('+919840610434')
+				elif product_name == 'Telephony':
+					resp.dial('+919840610434')
+				elif product_name == 'Optus TV':
+					resp.dial('+919840610434')
+				elif product_name == 'Financial Services':
+					resp.dial('+919840610434')
+					
+			# Transfer for Tech_services
+    			elif intentname == 'tech_services_cartwright':
+				if product_name == 'Postpaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Prepaid':
+					resp.dial('+919840610434')
+				elif product_name == 'Mobile Broadband':
+					resp.dial('+919840610434')
+				elif product_name == 'Internet':
+					resp.dial('+919840610434')
+				elif product_name == 'Telephony':
+					resp.dial('+919840610434')
+				elif product_name == 'Optus TV':
+					resp.dial('+919840610434')
+				elif product_name == 'Financial Services':
+					resp.dial('+919840610434')
 	
+			# Transfer to General services if employee number is not provided
+    			elif intentname == 'no_employee_number_cartwright':
+				response.dial('+917338856833')
+			
+			# Catch all error/exception scenarios and transfer to General services
+			else:
+				response.dial('+917338856833')
+	
+	
+	# When confidence of speech recogniton is not enough, replay the previous conversation
 	else:
-		# When confidence of speech recogniton is not enough, replay the previous conversation
-        	output_text = prior_text
+		output_text = prior_text
         	values = {"prior_text": output_text, 
 			  "polly_voiceid": polly_voiceid, 
 			  "twilio_asr_language": twilio_asr_language, 
@@ -200,16 +277,35 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
 	response = requests.request("POST", url=apiai_url, data=json.dumps(payload), headers=headers, params=apiai_querystring)
 	output = json.loads(response.text)
 	print json.dumps(output, indent=2)
+	
 	# Get values from Dialogflow
 	try:
 		intent_name = output['result']['intentname']
 	except:
 		intent_name= ""
 	try:
+		product_name = output['result']['parameters']['optus_product']
+	except:
+		product_name= ""
+	try:
+		emp_id = output['result']['parameters']['employee_id']
+	except:
+		emp_id= ""	
+	try:
 		output_text = output['result']['fulfillment']['speech']
 	except:
 		output_text = ""
-    	return intent_name, output_text
+	try:
+		intent_stage = output['result']['contexts']
+    	except:
+		intent_stage = "unknown"
+
+    	if (output['result']['actionIncomplete']):
+		dialog_state = 'in-progress'
+    	else:
+        	dialog_state = 'complete'
+    	
+	return intent_name, output_text, product_name, emp_id, intent_stage
 
 #####
 ##### Dialogflow fulfillment webhook
@@ -241,8 +337,6 @@ def processRequest(req):
 		#Validate employee number
 		if (str(emp_id)[:2]) != '10':
 			speech = 'This is not a valid employee number. Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
 		else:
 			speech = 'Thanks for providing your employee number. How can we help you today?'
 	
@@ -252,109 +346,23 @@ def processRequest(req):
 	
     	# Transfer for Billing_services
     	elif intentname == 'billing_services_cartwright':
-		if product_name == 'Postpaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Prepaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Mobile Broadband':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Internet':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Telephony':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Optus TV':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
-		elif product_name == 'Financial Services':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			#response = VoiceResponse()
-			resp.dial('+919840610434')
+		speech = 'Kindly hold on while we connect you to one of our customer service agent'
 	
     	# Transfer for Sales_services   
     	elif intentname == 'sales_services_cartwright':
-		if product_name == 'Postpaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Prepaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Mobile Broadband':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Internet':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Telephony':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Optus TV':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Financial Services':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
+		speech = 'Kindly hold on while we connect you to one of our customer service agent'
 	
     	# Transfer for Tech_services
     	elif intentname == 'tech_services_cartwright':
-		if product_name == 'Postpaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Prepaid':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Mobile Broadband':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Internet':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Telephony':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Optus TV':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
-		elif product_name == 'Financial Services':
-			speech = 'Kindly hold on while we connect you to one of our customer service agent'
-			response = VoiceResponse()
-			response.dial('+917338856833')
+		speech = 'Kindly hold on while we connect you to one of our customer service agent'
 			
     	# Transfer to General services if employee number is not provided
     	elif intentname == 'no_employee_number_cartwright':
-		print intentname
 		speech = 'Kindly hold on while we connect you to one of our customer service agent'
-		response = VoiceResponse()
-		response.dial('+917338856833')
 		
 	# Catch all error/exception scenarios and transfer to General services
 	else:
 		speech = 'Kindly hold on while we connect you to one of our customer service agent'
-		response = VoiceResponse()
-		response.dial('+917338856833')
 	
 	return {'speech': speech, 'displayText': speech, 
 		'source': 'careforyou'
