@@ -123,7 +123,7 @@ def process_speech():
 	
 	if (confidence >= 0.0):
 		# Step 1: Call Dialogflow for intent analysis
-		intent_name, output_text, product_name, emp_id, intent_stage = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
+		intent_name, output_text, product_name, emp_id, intent_stage, dialog_state = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
 		
 		# Step 2: Speech input processing by Twilio
 		
@@ -305,7 +305,7 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
     	else:
         	dialog_state = 'complete'
     	
-	return intent_name, output_text, product_name, emp_id, intent_stage
+	return intent_name, output_text, product_name, emp_id, intent_stage, dialog_state
 
 #####
 ##### Dialogflow fulfillment webhook
