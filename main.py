@@ -222,13 +222,12 @@ def process_speech():
 	
 			# Transfer to General services if employee number is not provided
     			elif intent_name == 'no_employee_number_cartwright':
-				response.dial('+917338856833')
+				resp.dial('+917338856833')
 			
 			# Catch all error/exception scenarios and transfer to General services
 			else:
-				response.dial('+917338856833')
-	
-	
+				resp.dial('+917338856833')
+		
 	# When confidence of speech recogniton is not enough, replay the previous conversation
 	else:
 		output_text = prior_text
