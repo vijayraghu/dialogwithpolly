@@ -170,7 +170,7 @@ def process_speech():
 					resp.dial('+919840610434')
 					
 			 # Transfer for Billing_services
-    			elif intentname == 'billing_services_cartwright':
+    			elif intent_name == 'billing_services_cartwright':
 				if product_name == 'Postpaid':
 					resp.dial('+919840610434')
 				elif product_name == 'Prepaid':
@@ -187,7 +187,7 @@ def process_speech():
 					resp.dial('+919840610434')
 					
 			# Transfer for Sales_services
-    			elif intentname == 'sales_services_cartwright':
+    			elif intent_name == 'sales_services_cartwright':
 				if product_name == 'Postpaid':
 					resp.dial('+919840610434')
 				elif product_name == 'Prepaid':
@@ -204,7 +204,7 @@ def process_speech():
 					resp.dial('+919840610434')
 					
 			# Transfer for Tech_services
-    			elif intentname == 'tech_services_cartwright':
+    			elif intent_name == 'tech_services_cartwright':
 				if product_name == 'Postpaid':
 					resp.dial('+919840610434')
 				elif product_name == 'Prepaid':
@@ -221,7 +221,7 @@ def process_speech():
 					resp.dial('+919840610434')
 	
 			# Transfer to General services if employee number is not provided
-    			elif intentname == 'no_employee_number_cartwright':
+    			elif intent_name == 'no_employee_number_cartwright':
 				response.dial('+917338856833')
 			
 			# Catch all error/exception scenarios and transfer to General services
