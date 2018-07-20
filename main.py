@@ -283,6 +283,7 @@ def process_speech():
 #####
 #@app.route('/apiai_text_to_intent', methods=['GET', 'POST'])
 def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language):
+	print "Inside apiai_text_to_intent"
 	headers = {
 		'authorization': "Bearer " + apiapi_client_access_key, 
 		'content-type': "application/json"
@@ -293,6 +294,7 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
 		  }
 	response = requests.request("POST", url=apiai_url, data=json.dumps(payload), headers=headers, params=apiai_querystring)
 	output = json.loads(response.text)
+	print output
 	print json.dumps(output, indent=2)
 	
 	# Get values from Dialogflow
