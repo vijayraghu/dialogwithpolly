@@ -125,6 +125,9 @@ def process_speech():
 		# Step 1: Call Dialogflow for intent analysis
 		intent_name, output_text, product_name, emp_id, intent_stage, dialog_state = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
 		
+		if intent_name == 'get_employee_number_cartwright':
+			output_text = '<speak>The employee number you provided is <say-as interpret-as="digits">' + emp_id + '</say-as>. Please confirm by saying Yes or No </speak>'
+		
 		# Step 2: Speech input processing by Twilio
 		values = {'prior_text': output_text}
         	qs2 = urllib.urlencode(values)
@@ -139,6 +142,11 @@ def process_speech():
 		gather.play(hostname + 'polly_text2speech?' + qs1)
 		print 'In progress: After polly tts'
 		resp.append(gather)
+		
+		# Transfer for default fallback intent
+		if intent_name == 'Default Fallback Intent':
+			print 'reached default intent. Transfering...'
+			resp.dial('+917338856833')
 		
 		# Perform employee number validation
 		if intent_name == 'get_employee_number_cartwright_yes':
