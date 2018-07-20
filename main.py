@@ -148,8 +148,9 @@ def process_speech():
 		
 		# Transfer to routepoint based in intent and product	
 		print 'Intent :' + intent_name
-		phone_number = getroutepoint(intent_name, optus_product)
-		resp.dial(phone_number)
+		if intent_name != '' and product_name != '':
+			phone_number = getroutepoint(intent_name, product_name)
+			resp.dial(phone_number)
 		#if intent_name in ['billing_services_cartwright','sales_services_cartwright']:
 			
 		# If gather is missing (no speech input), redirect to process incomplete speech via Dialogflow
