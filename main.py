@@ -245,7 +245,7 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
 
 
 # Get route point based on Intent and product#
-def getroutepoint(intent_name, optus_product):
+def getroutepoint(intent_name, product_name):
 	#Catch all exceptions
 	phone_number = "+917338856833"	
 	
