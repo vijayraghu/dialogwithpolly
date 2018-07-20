@@ -126,8 +126,26 @@ def process_speech():
 		intent_name, output_text, product_name, emp_id, intent_stage, dialog_state = apiai_text_to_intent(apiai_client_access_key, input_text, user_id, apiai_language)
 		
 		# Step 2: Speech input processing by Twilio
+		values = {'prior_text': output_text}
+        	qs2 = urllib.urlencode(values)
+        	action_url = '/process_speech?' + qs2
+        	gather = Gather(input="speech", hints=hints, language=twilio_asr_language, speechTimeout="auto", action=action_url, method="POST")
+        	values = {"text": output_text, 
+			  "polly_voiceid": polly_voiceid, 
+			  "region": "ap-southeast-2"
+			 }
+		qs1 = urllib.urlencode(values)
+		print 'In-progress: Before polly tts'
+		gather.play(hostname + 'polly_text2speech?' + qs1)
+		print 'In progress: After polly tts'
+		resp.append(gather)
 		
-		# Dialog is in progress
+		print 'Intent :' + intent_name
+		if intent_name in ['billing_services_cartwright','sales_services_cartwright']:
+			resp.dial('+919840610434')
+			
+		
+		'''# Dialog is in progress
 		if dialog_state in ['in-progress']:
 			values = {'prior_text': output_text}
         		qs2 = urllib.urlencode(values)
@@ -226,7 +244,7 @@ def process_speech():
 			
 			# Catch all error/exception scenarios and transfer to General services
 			else:
-				resp.dial('+917338856833')
+				resp.dial('+917338856833')'''
 		
 	# When confidence of speech recogniton is not enough, replay the previous conversation
 	else:
