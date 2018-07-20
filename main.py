@@ -297,7 +297,7 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
 	
 	# Get values from Dialogflow
 	try:
-		intent_name = output['result']['intentName']
+		intent_name = output['result']['metadata']['intentName']
 	except:
 		intent_name= ""
 	try:
