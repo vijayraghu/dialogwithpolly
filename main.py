@@ -140,112 +140,29 @@ def process_speech():
 		print 'In progress: After polly tts'
 		resp.append(gather)
 		
+		# Perform employee number validation
+		if intent_name == 'get_employee_number_cartwright_yes':
+			#Validate employee number
+			if (str(emp_id)[:2]) != '10':
+				resp.dial('+919840610434')
+		
+		# Transfer to routepoint based in intent and product	
 		print 'Intent :' + intent_name
-		if intent_name in ['billing_services_cartwright','sales_services_cartwright']:
-			resp.dial('+919840610434')
+		phone_number = getroutepoint(intent_name, optus_product)
+		resp.dial(phone_number)
+		#if intent_name in ['billing_services_cartwright','sales_services_cartwright']:
 			
-		
-		'''# Dialog is in progress
-		if dialog_state in ['in-progress']:
-			values = {'prior_text': output_text}
-        		qs2 = urllib.urlencode(values)
-        		action_url = '/process_speech?' + qs2
-        		gather = Gather(input="speech", hints=hints, language=twilio_asr_language, speechTimeout="auto", action=action_url, method="POST")
-        		values = {"text": output_text, 
-				  "polly_voiceid": polly_voiceid, 
-				  "region": "ap-southeast-2"
-				 }
-			qs1 = urllib.urlencode(values)
-			print 'In-progress: Before polly tts'
-			gather.play(hostname + 'polly_text2speech?' + qs1)
-			print 'In progress: After polly tts'
-			resp.append(gather)
-		
-			# If gather is missing (no speech input), redirect to process incomplete speech via Dialogflow
-			values = {'prior_text': output_text, 
-				  "polly_voiceid": polly_voiceid, 
-				  'twilio_asr_language': twilio_asr_language, 
-				  'apiai_language': apiai_language, 
-				  'SpeechResult': '', 
-				  'Confidence': 0.0}
-			qs3 = urllib.urlencode(values)
-			action_url = '/process_speech?' + qs3
-			resp.redirect(action_url)
-		
-		# Dialog is completed
-		elif dialog_state in ['complete']:
-			values = {"text": output_text, 
-				  "polly_voiceid": polly_voiceid, 
-				  "region": "ap-southeast-2"
-				 }
-			qs = urllib.urlencode(values)
-			resp.play(hostname + 'polly_text2speech?' + qs)
+		# If gather is missing (no speech input), redirect to process incomplete speech via Dialogflow
+		values = {'prior_text': output_text, 
+			  "polly_voiceid": polly_voiceid, 
+			  'twilio_asr_language': twilio_asr_language, 
+			  'apiai_language': apiai_language, 
+			  'SpeechResult': '', 
+			  'Confidence': 0.0}
+		qs3 = urllib.urlencode(values)
+		action_url = '/process_speech?' + qs3
+		resp.redirect(action_url)
 			
-			# Perform employee number validation
-			if intent_name == 'get_employee_number_cartwright_yes':
-				#Validate employee number
-				if (str(emp_id)[:2]) != '10':
-					resp.dial('+919840610434')
-					
-			 # Transfer for Billing_services
-    			elif intent_name == 'billing_services_cartwright':
-				if product_name == 'Postpaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Prepaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Mobile Broadband':
-					resp.dial('+919840610434')
-				elif product_name == 'Internet':
-					resp.dial('+919840610434')
-				elif product_name == 'Telephony':
-					resp.dial('+919840610434')
-				elif product_name == 'Optus TV':
-					resp.dial('+919840610434')
-				elif product_name == 'Financial Services':
-					resp.dial('+919840610434')
-					
-			# Transfer for Sales_services
-    			elif intent_name == 'sales_services_cartwright':
-				if product_name == 'Postpaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Prepaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Mobile Broadband':
-					resp.dial('+919840610434')
-				elif product_name == 'Internet':
-					resp.dial('+919840610434')
-				elif product_name == 'Telephony':
-					resp.dial('+919840610434')
-				elif product_name == 'Optus TV':
-					resp.dial('+919840610434')
-				elif product_name == 'Financial Services':
-					resp.dial('+919840610434')
-					
-			# Transfer for Tech_services
-    			elif intent_name == 'tech_services_cartwright':
-				if product_name == 'Postpaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Prepaid':
-					resp.dial('+919840610434')
-				elif product_name == 'Mobile Broadband':
-					resp.dial('+919840610434')
-				elif product_name == 'Internet':
-					resp.dial('+919840610434')
-				elif product_name == 'Telephony':
-					resp.dial('+919840610434')
-				elif product_name == 'Optus TV':
-					resp.dial('+919840610434')
-				elif product_name == 'Financial Services':
-					resp.dial('+919840610434')
-	
-			# Transfer to General services if employee number is not provided
-    			elif intent_name == 'no_employee_number_cartwright':
-				resp.dial('+917338856833')
-			
-			# Catch all error/exception scenarios and transfer to General services
-			else:
-				resp.dial('+917338856833')'''
-		
 	# When confidence of speech recogniton is not enough, replay the previous conversation
 	else:
 		output_text = prior_text
@@ -274,7 +191,6 @@ def process_speech():
 		qs2 = urllib.urlencode(values)
 		action_url = "/process_speech?" + qs2
 		resp.redirect(action_url)
-		
 	print str(resp)
 	return str(resp)
 
@@ -326,6 +242,68 @@ def apiai_text_to_intent(apiapi_client_access_key, input_text, user_id, language
     	
 	return intent_name, output_text, product_name, emp_id, intent_stage, dialog_state
 
+
+# Get route point based on Intent and product#
+def getroutepoint(intent_name, optus_product):
+	#Catch all exceptions
+	phone_number = "+917338856833"	
+	
+	# Transfer for Billing_services
+    	if intent_name == 'billing_services_cartwright':
+		if product_name == 'Postpaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Prepaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Mobile Broadband':
+			phone_number = "+919840610434"
+		elif product_name == 'Internet':
+			phone_number = "+919840610434"
+		elif product_name == 'Telephony':
+			phone_number = "+919840610434"
+		elif product_name == 'Optus TV':
+			phone_number = "+919840610434"
+		elif product_name == 'Financial Services':
+			phone_number = "+919840610434"
+					
+	# Transfer for Sales_services
+    	if intent_name == 'sales_services_cartwright':
+		if product_name == 'Postpaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Prepaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Mobile Broadband':
+			phone_number = "+919840610434"
+		elif product_name == 'Internet':
+			phone_number = "+919840610434"
+		elif product_name == 'Telephony':
+			phone_number = "+919840610434"
+		elif product_name == 'Optus TV':
+			phone_number = "+919840610434"
+		elif product_name == 'Financial Services':
+			phone_number = "+919840610434"
+					
+	# Transfer for Tech_services
+	if intent_name == 'sales_services_cartwright':
+		if product_name == 'Postpaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Prepaid':
+			phone_number = "+919840610434"
+		elif product_name == 'Mobile Broadband':
+			phone_number = "+919840610434"
+		elif product_name == 'Internet':
+			phone_number = "+919840610434"
+		elif product_name == 'Telephony':
+			phone_number = "+919840610434"
+		elif product_name == 'Optus TV':
+			phone_number = "+919840610434"
+		elif product_name == 'Financial Services':
+			phone_number = "+919840610434"
+	
+	# Transfer to General services if employee number is not provided
+    	if intent_name == 'no_employee_number_cartwright':
+			phone_number = "+919840610434"
+	
+	return phone_number
 #####
 ##### Dialogflow fulfillment webhook
 #####
